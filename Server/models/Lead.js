@@ -7,8 +7,8 @@ const LeadSchema = new mongoose.Schema({
   company: { type: String },
   status: {
     type: String,
-    enum: ["New", "Contacted", "Qualified", "Lost"],
-    default: "New",
+    enum: ["New Lead", "Contacted", "Qualified", "Proposal", "Won", "Lost"],
+    default: "New Lead",
   },
   assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   createdAt: { type: Date, default: Date.now },

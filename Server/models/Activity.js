@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const ActivitySchema = new mongoose.Schema({
   leadId: { type: mongoose.Schema.Types.ObjectId, ref: "Lead", required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   type: {
     type: String,
     enum: ["Call", "Meeting", "Note", "Follow-up"],
