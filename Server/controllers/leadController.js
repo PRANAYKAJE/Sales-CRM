@@ -4,7 +4,7 @@ const Lead = require('../models/Lead');
 const getLeads = async (req, res) => {
  
   let query = {};
-  if (req.user.role !== 'Admin') {
+  if (req.user.role.toLowerCase() !== 'admin') {
     query.assignedTo = req.user._id;
   }
 

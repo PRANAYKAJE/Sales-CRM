@@ -8,7 +8,7 @@ try {
   process.exit(1); // Stop the server so you can read the error
 }
 
-const Lead = require('../models/Lead');
+
 // ... rest of code
 const Deal = require('../models/Deal');
 const Lead = require('../models/Lead');
@@ -23,7 +23,7 @@ const getDeals = async (req, res) => {
       query.stage = req.query.stage;
     }
 
-    if (req.user.role !== 'Admin') {
+    if (req.user.role.toLowerCase() !== 'admin') {
       const userLeads = await Lead.find({ assignedTo: req.user._id }).select('_id');
       const leadIds = userLeads.map(lead => lead._id);
       query.leadId = { $in: leadIds };
