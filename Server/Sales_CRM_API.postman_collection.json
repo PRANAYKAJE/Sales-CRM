@@ -1,0 +1,246 @@
+{
+	"info": {
+		"_postman_id": "sales-crm-api",
+		"name": "Sales CRM API",
+		"description": "API collection for Sales CRM Backend",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"test@crm.com\",\n    \"password\": \"Test@123\",\n    \"role\": \"sales\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{BASE_URL}}/api/auth/register", "host": ["{{BASE_URL}}"], "path": ["api", "auth", "register"] }
+					}
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@crm.com\",\n    \"password\": \"Admin@123\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{BASE_URL}}/api/auth/login", "host": ["{{BASE_URL}}"], "path": ["api", "auth", "login"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Leads",
+			"item": [
+				{
+					"name": "Get All Leads",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{TOKEN}}", "type": "text" }],
+						"url": { "raw": "{{BASE_URL}}/api/leads", "host": ["{{BASE_URL}}"], "path": ["api", "leads"] }
+					}
+				},
+				{
+					"name": "Get Lead by ID",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{TOKEN}}", "type": "text" }],
+						"url": { "raw": "{{BASE_URL}}/api/leads/{{LEAD_ID}}", "host": ["{{BASE_URL}}"], "path": ["api", "leads", "{{LEAD_ID}}"] }
+					}
+				},
+				{
+					"name": "Create Lead",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{TOKEN}}", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"New Company\",\n    \"email\": \"contact@newcompany.com\",\n    \"phone\": \"555-9999\",\n    \"company\": \"New Company Inc\",\n    \"status\": \"New Lead\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{BASE_URL}}/api/leads", "host": ["{{BASE_URL}}"], "path": ["api", "leads"] }
+					}
+				},
+				{
+					"name": "Update Lead",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{TOKEN}}", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"Contacted\",\n    \"phone\": \"555-8888\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{BASE_URL}}/api/leads/{{LEAD_ID}}", "host": ["{{BASE_URL}}"], "path": ["api", "leads", "{{LEAD_ID}}"] }
+					}
+				},
+				{
+					"name": "Delete Lead",
+					"request": {
+						"method": "DELETE",
+						"header": [{ "key": "Authorization", "value": "Bearer {{TOKEN}}", "type": "text" }],
+						"url": { "raw": "{{BASE_URL}}/api/leads/{{LEAD_ID}}", "host": ["{{BASE_URL}}"], "path": ["api", "leads", "{{LEAD_ID}}"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Deals",
+			"item": [
+				{
+					"name": "Get All Deals",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{TOKEN}}", "type": "text" }],
+						"url": { "raw": "{{BASE_URL}}/api/deals", "host": ["{{BASE_URL}}"], "path": ["api", "deals"] }
+					}
+				},
+				{
+					"name": "Get Deal by ID",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{TOKEN}}", "type": "text" }],
+						"url": { "raw": "{{BASE_URL}}/api/deals/{{DEAL_ID}}", "host": ["{{BASE_URL}}"], "path": ["api", "deals", "{{DEAL_ID}}"] }
+					}
+				},
+				{
+					"name": "Create Deal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{TOKEN}}", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"leadId\": \"{{LEAD_ID}}\",\n    \"title\": \"New Deal\",\n    \"value\": 10000,\n    \"stage\": \"Prospecting\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{BASE_URL}}/api/deals", "host": ["{{BASE_URL}}"], "path": ["api", "deals"] }
+					}
+				},
+				{
+					"name": "Update Deal",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{TOKEN}}", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stage\": \"Negotiation\",\n    \"value\": 15000\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{BASE_URL}}/api/deals/{{DEAL_ID}}", "host": ["{{BASE_URL}}"], "path": ["api", "deals", "{{DEAL_ID}}"] }
+					}
+				},
+				{
+					"name": "Delete Deal",
+					"request": {
+						"method": "DELETE",
+						"header": [{ "key": "Authorization", "value": "Bearer {{TOKEN}}", "type": "text" }],
+						"url": { "raw": "{{BASE_URL}}/api/deals/{{DEAL_ID}}", "host": ["{{BASE_URL}}"], "path": ["api", "deals", "{{DEAL_ID}}"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Activities",
+			"item": [
+				{
+					"name": "Get All Activities",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{TOKEN}}", "type": "text" }],
+						"url": { "raw": "{{BASE_URL}}/api/activities", "host": ["{{BASE_URL}}"], "path": ["api", "activities"] }
+					}
+				},
+				{
+					"name": "Get Activity by ID",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{TOKEN}}", "type": "text" }],
+						"url": { "raw": "{{BASE_URL}}/api/activities/{{ACTIVITY_ID}}", "host": ["{{BASE_URL}}"], "path": ["api", "activities", "{{ACTIVITY_ID}}"] }
+					}
+				},
+				{
+					"name": "Create Activity",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{TOKEN}}", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"leadId\": \"{{LEAD_ID}}\",\n    \"type\": \"Call\",\n    \"description\": \"Called the client for follow up\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{BASE_URL}}/api/activities", "host": ["{{BASE_URL}}"], "path": ["api", "activities"] }
+					}
+				},
+				{
+					"name": "Update Activity",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{TOKEN}}", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"Meeting\",\n    \"description\": \"Had a meeting with the client\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{BASE_URL}}/api/activities/{{ACTIVITY_ID}}", "host": ["{{BASE_URL}}"], "path": ["api", "activities", "{{ACTIVITY_ID}}"] }
+					}
+				},
+				{
+					"name": "Delete Activity",
+					"request": {
+						"method": "DELETE",
+						"header": [{ "key": "Authorization", "value": "Bearer {{TOKEN}}", "type": "text" }],
+						"url": { "raw": "{{BASE_URL}}/api/activities/{{ACTIVITY_ID}}", "host": ["{{BASE_URL}}"], "path": ["api", "activities", "{{ACTIVITY_ID}}"] }
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "http://localhost:5000"
+		},
+		{
+			"key": "TOKEN",
+			"value": ""
+		},
+		{
+			"key": "LEAD_ID",
+			"value": ""
+		},
+		{
+			"key": "DEAL_ID",
+			"value": ""
+		},
+		{
+			"key": "ACTIVITY_ID",
+			"value": ""
+		}
+	]
+}
