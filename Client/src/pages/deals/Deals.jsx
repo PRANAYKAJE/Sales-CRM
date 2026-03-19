@@ -3,11 +3,10 @@ import { dealsAPI, leadsAPI } from '../../utils/api'
 import DealModal from './DealModal'
 
 const stages = [
-  { id: 'Prospecting', label: 'Prospecting', color: 'blue' },
-  { id: 'Qualification', label: 'Qualification', color: 'purple' },
-  { id: 'Proposal', label: 'Proposal', color: 'orange' },
+  { id: 'Prospect', label: 'Prospect', color: 'blue' },
   { id: 'Negotiation', label: 'Negotiation', color: 'yellow' },
-  { id: 'Closed', label: 'Closed', color: 'gray' },
+  { id: 'Won', label: 'Won', color: 'green' },
+  { id: 'Lost', label: 'Lost', color: 'red' },
 ]
 
 export default function Deals() {
@@ -30,8 +29,6 @@ export default function Deals() {
         dealsAPI.getAll(),
         leadsAPI.getAll(),
       ])
-      console.log('Deals API Response:', dealsRes.data)
-      console.log('Leads API Response:', leadsRes.data)
       setDeals(dealsRes.data || [])
       setLeads(leadsRes.data || [])
     } catch (err) {
@@ -76,9 +73,7 @@ export default function Deals() {
   }
 
   const getDealsByStage = (stageId) => {
-    const filtered = deals.filter((deal) => deal.stage === stageId)
-    console.log(`Deals for stage ${stageId}:`, filtered)
-    return filtered
+    return deals.filter((deal) => deal.stage === stageId)
   }
 
   const formatCurrency = (value) => {
@@ -97,29 +92,23 @@ export default function Deals() {
         text: 'text-blue-600 dark:text-blue-400',
         badge: 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300',
       },
-      purple: {
-        border: 'border-purple-500 dark:border-purple-600',
-        bg: 'bg-purple-50 dark:bg-purple-900/20',
-        text: 'text-purple-600 dark:text-purple-400',
-        badge: 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300',
-      },
-      orange: {
-        border: 'border-orange-500 dark:border-orange-600',
-        bg: 'bg-orange-50 dark:bg-orange-900/20',
-        text: 'text-orange-600 dark:text-orange-400',
-        badge: 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300',
-      },
       yellow: {
         border: 'border-yellow-500 dark:border-yellow-600',
         bg: 'bg-yellow-50 dark:bg-yellow-900/20',
         text: 'text-yellow-600 dark:text-yellow-400',
         badge: 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300',
       },
-      gray: {
-        border: 'border-gray-500 dark:border-gray-600',
-        bg: 'bg-gray-50 dark:bg-gray-900/20',
-        text: 'text-gray-600 dark:text-gray-400',
-        badge: 'bg-gray-100 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300',
+      green: {
+        border: 'border-green-500 dark:border-green-600',
+        bg: 'bg-green-50 dark:bg-green-900/20',
+        text: 'text-green-600 dark:text-green-400',
+        badge: 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300',
+      },
+      red: {
+        border: 'border-red-500 dark:border-red-600',
+        bg: 'bg-red-50 dark:bg-red-900/20',
+        text: 'text-red-600 dark:text-red-400',
+        badge: 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300',
       },
     }
     return colors[color] || colors.blue
@@ -165,7 +154,7 @@ export default function Deals() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stages.map((stage) => {
           const colors = getStageColor(stage.color)
           const stageDeals = getDealsByStage(stage.id)
@@ -184,7 +173,7 @@ export default function Deals() {
                   </p>
                 </div>
 
-                <div className="p-4 space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
+                <div className="p-4 space-y-3 max-h-96 overflow-y-auto custom-scrollbar">
                   {stageDeals.length === 0 ? (
                     <p className="text-gray-400 dark:text-gray-500 text-sm text-center py-4">No deals</p>
                   ) : (

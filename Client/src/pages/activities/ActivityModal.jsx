@@ -1,9 +1,11 @@
-import { useState } from 'react'
-import { activitiesAPI } from '../../utils/api'
+import { useState, useEffect } from 'react'
+import { activitiesAPI, dealsAPI } from '../../utils/api'
 
 export default function ActivityModal({ leads, onClose, onSave }) {
+  const [deals, setDeals] = useState([])
   const [formData, setFormData] = useState({
     leadId: '',
+    dealId: '',
     type: 'Call',
     description: '',
   })
@@ -11,11 +13,24 @@ export default function ActivityModal({ leads, onClose, onSave }) {
   const [error, setError] = useState('')
   const [errors, setErrors] = useState({})
 
+  useEffect(() => {
+    fetchDeals()
+  }, [])
+
+  const fetchDeals = async () => {
+    try {
+      const res = await dealsAPI.getAll()
+      setDeals(res.data || [])
+    } catch (err) {
+      console.error('Error fetching deals:', err)
+    }
+  }
+
   const validateForm = () => {
     const newErrors = {}
     
-    if (!formData.leadId) {
-      newErrors.leadId = 'Please select a lead'
+    if (!formData.leadId && !formData.dealId) {
+      newErrors.general = 'Please select a lead or deal'
     }
     
     if (!formData.description.trim()) {
@@ -33,6 +48,9 @@ export default function ActivityModal({ leads, onClose, onSave }) {
     if (errors[name]) {
       setErrors({ ...errors, [name]: '' })
     }
+    if (errors.general) {
+      setErrors({ ...errors, general: '' })
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -46,7 +64,13 @@ export default function ActivityModal({ leads, onClose, onSave }) {
     setError('')
 
     try {
-      const response = await activitiesAPI.create(formData)
+      const payload = {
+        type: formData.type,
+        description: formData.description,
+        leadId: formData.leadId || null,
+        dealId: formData.dealId || null,
+      }
+      const response = await activitiesAPI.create(payload)
       onSave(response.data)
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to save activity')
@@ -64,7 +88,7 @@ export default function ActivityModal({ leads, onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4 animate-fade-in" onClick={onClose}>
-      <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg animate-scale-in" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-scale-in" onClick={(e) => e.stopPropagation()}>
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Log New Activity</h2>
@@ -86,26 +110,49 @@ export default function ActivityModal({ leads, onClose, onSave }) {
             </div>
           )}
 
+          {errors.general && (
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-600 dark:text-red-400">{errors.general}</p>
+            </div>
+          )}
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Related Lead *
+                Related Lead
               </label>
               <select
                 name="leadId"
                 value={formData.leadId}
                 onChange={handleChange}
-                required
-                className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-800 dark:text-gray-200 ${errors.leadId ? 'border-red-500 dark:border-red-500' : 'border-gray-200 dark:border-gray-600'}`}
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-800 dark:text-gray-200"
               >
-                <option value="">Select a lead</option>
+                <option value="">Select a lead (optional)</option>
                 {leads.map((lead) => (
                   <option key={lead._id} value={lead._id}>
                     {lead.name} {lead.company ? `- ${lead.company}` : ''}
                   </option>
                 ))}
               </select>
-              {errors.leadId && <p className="mt-1 text-sm text-red-500">{errors.leadId}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Related Deal
+              </label>
+              <select
+                name="dealId"
+                value={formData.dealId}
+                onChange={handleChange}
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-800 dark:text-gray-200"
+              >
+                <option value="">Select a deal (optional)</option>
+                {deals.map((deal) => (
+                  <option key={deal._id} value={deal._id}>
+                    {deal.title} - ${deal.value || 0}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>

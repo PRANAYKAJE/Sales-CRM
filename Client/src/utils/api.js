@@ -42,6 +42,15 @@ export const authAPI = {
   register: (data) => api.post('/auth/register', data),
 };
 
+// Users API calls
+export const usersAPI = {
+  getAll: () => api.get('/users'),
+  getSalesPersons: () => api.get('/users/sales-persons'),
+  getById: (id) => api.get(`/users/${id}`),
+  update: (id, data) => api.put(`/users/${id}`, data),
+  delete: (id) => api.delete(`/users/${id}`),
+};
+
 // Leads API calls
 export const leadsAPI = {
   getAll: () => api.get('/leads'),

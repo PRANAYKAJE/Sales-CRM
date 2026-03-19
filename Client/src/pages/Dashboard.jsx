@@ -33,8 +33,8 @@ export default function Dashboard() {
 
       setStats({
         totalLeads: leads.length,
-        dealsWon: deals.filter((d) => d.leadId?.status === 'Won').length,
-        dealsLost: deals.filter((d) => d.leadId?.status === 'Lost').length,
+        dealsWon: deals.filter((d) => d.stage === 'Won').length,
+        dealsLost: deals.filter((d) => d.stage === 'Lost').length,
         activities: activities.length,
         totalDealValue: deals.reduce((sum, d) => sum + (d.value || 0), 0),
       })

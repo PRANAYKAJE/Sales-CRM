@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { leadsAPI } from '../../utils/api'
 import LeadModal from './LeadModal'
 
 export default function Leads() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [leads, setLeads] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
   const [statusFilter, setStatusFilter] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [editingLead, setEditingLead] = useState(null)
@@ -17,17 +18,33 @@ export default function Leads() {
     fetchLeads()
   }, [])
 
+  useEffect(() => {
+    const search = searchParams.get('search')
+    if (search !== null) {
+      setSearchQuery(search)
+    }
+  }, [searchParams])
+
   const fetchLeads = async () => {
     try {
       setError(null)
       const response = await leadsAPI.getAll()
-      console.log('Leads API Response:', response.data)
       setLeads(response.data || [])
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load leads')
       console.error('Error fetching leads:', err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value
+    setSearchQuery(value)
+    if (value) {
+      setSearchParams({ search: value })
+    } else {
+      setSearchParams({})
     }
   }
 
@@ -68,7 +85,8 @@ export default function Leads() {
     const searchLower = searchQuery.toLowerCase().trim()
     const matchesSearch = !searchLower || 
       (lead.name && lead.name.toLowerCase().includes(searchLower)) ||
-      (lead.email && lead.email.toLowerCase().includes(searchLower))
+      (lead.email && lead.email.toLowerCase().includes(searchLower)) ||
+      (lead.company && lead.company.toLowerCase().includes(searchLower))
     const matchesStatus = !statusFilter || lead.status === statusFilter
     return matchesSearch && matchesStatus
   })
@@ -141,9 +159,9 @@ export default function Leads() {
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search by name or email..."
+                placeholder="Search by name, email, company..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
                 className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
               />
               <svg

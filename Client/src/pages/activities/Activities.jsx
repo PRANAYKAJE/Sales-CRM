@@ -9,6 +9,7 @@ export default function Activities() {
   const [error, setError] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(null)
+  const [typeFilter, setTypeFilter] = useState('')
 
   useEffect(() => {
     fetchData()
@@ -21,7 +22,6 @@ export default function Activities() {
         activitiesAPI.getAll(),
         leadsAPI.getAll(),
       ])
-      console.log('Activities API Response:', activitiesRes.data)
       setActivities(activitiesRes.data || [])
       setLeads(leadsRes.data || [])
     } catch (err) {
@@ -54,6 +54,11 @@ export default function Activities() {
     setActivities([activityData, ...activities])
     setShowModal(false)
   }
+
+  const filteredActivities = activities.filter((activity) => {
+    if (!typeFilter) return true
+    return activity.type === typeFilter
+  })
 
   const formatDate = (date) => {
     if (!date) return '-'
@@ -102,6 +107,14 @@ export default function Activities() {
     return colors[type] || colors.Note
   }
 
+  const typeOptions = [
+    { value: '', label: 'All Types' },
+    { value: 'Call', label: 'Calls' },
+    { value: 'Meeting', label: 'Meetings' },
+    { value: 'Note', label: 'Notes' },
+    { value: 'Follow-up', label: 'Follow-ups' },
+  ]
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -142,25 +155,48 @@ export default function Activities() {
         </div>
       )}
 
+      <div className="flex items-center gap-4">
+        <select
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value)}
+          className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-800 dark:text-gray-200"
+        >
+          {typeOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <span className="text-sm text-gray-500 dark:text-gray-400">
+          {filteredActivities.length} {filteredActivities.length === 1 ? 'activity' : 'activities'}
+        </span>
+      </div>
+
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-card border border-gray-100 dark:border-gray-700">
         <div className="p-6">
-          {activities.length === 0 ? (
+          {filteredActivities.length === 0 ? (
             <div className="text-center py-12">
               <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-              <p className="text-gray-500 dark:text-gray-400">No activities logged yet</p>
-              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Start by logging your first activity</p>
-              <button
-                onClick={handleAddActivity}
-                className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
-              >
-                Log Your First Activity
-              </button>
+              <p className="text-gray-500 dark:text-gray-400">
+                {typeFilter ? 'No activities match your filter' : 'No activities logged yet'}
+              </p>
+              {!typeFilter && (
+                <>
+                  <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Start by logging your first activity</p>
+                  <button
+                    onClick={handleAddActivity}
+                    className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                  >
+                    Log Your First Activity
+                  </button>
+                </>
+              )}
             </div>
           ) : (
             <div className="space-y-4">
-              {activities.map((activity) => (
+              {filteredActivities.map((activity) => (
                 <div
                   key={activity._id}
                   className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
@@ -175,10 +211,15 @@ export default function Activities() {
                         {activity.description && (
                           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{activity.description}</p>
                         )}
-                        <div className="flex items-center gap-4 mt-2">
+                        <div className="flex flex-wrap items-center gap-4 mt-2">
                           {activity.leadId?.name && (
                             <span className="text-xs text-gray-500 dark:text-gray-400">
                               Lead: {activity.leadId.name}
+                            </span>
+                          )}
+                          {activity.dealId?.title && (
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              Deal: {activity.dealId.title}
                             </span>
                           )}
                           <span className="text-xs text-gray-400 dark:text-gray-500">

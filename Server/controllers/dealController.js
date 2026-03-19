@@ -67,8 +67,8 @@ const createDeal = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
-    const validStages = ['Prospecting', 'Qualification', 'Proposal', 'Negotiation', 'Closed'];
-    const dealStage = validStages.includes(stage) ? stage : 'Prospecting';
+    const validStages = ['Prospect', 'Negotiation', 'Won', 'Lost'];
+    const dealStage = validStages.includes(stage) ? stage : 'Prospect';
 
     const deal = await Deal.create({ leadId, title, value: value || 0, stage: dealStage });
     return res.status(201).json(deal);
@@ -93,7 +93,7 @@ const updateDeal = async (req, res) => {
     }
 
     const allowedUpdates = ['title', 'value', 'stage'];
-    const validStages = ['Prospecting', 'Qualification', 'Proposal', 'Negotiation', 'Closed'];
+    const validStages = ['Prospect', 'Negotiation', 'Won', 'Lost'];
 
     Object.keys(req.body).forEach((key) => {
       if (allowedUpdates.includes(key)) {

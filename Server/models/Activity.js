@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 
 const ActivitySchema = new mongoose.Schema({
-  leadId: { type: mongoose.Schema.Types.ObjectId, ref: "Lead", required: true },
+  leadId: { type: mongoose.Schema.Types.ObjectId, ref: "Lead", default: null },
+  dealId: { type: mongoose.Schema.Types.ObjectId, ref: "Deal", default: null },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   type: {
     type: String,

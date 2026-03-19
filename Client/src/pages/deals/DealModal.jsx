@@ -5,7 +5,7 @@ export default function DealModal({ deal, leads, onClose, onSave }) {
   const [formData, setFormData] = useState({
     title: '',
     value: '',
-    stage: 'Prospecting',
+    stage: 'Prospect',
     leadId: '',
   })
   const [loading, setLoading] = useState(false)
@@ -17,7 +17,7 @@ export default function DealModal({ deal, leads, onClose, onSave }) {
       setFormData({
         title: deal.title || '',
         value: deal.value || '',
-        stage: deal.stage || 'Prospecting',
+        stage: deal.stage || 'Prospect',
         leadId: typeof deal.leadId === 'object' ? deal.leadId._id : deal.leadId || '',
       })
     }
@@ -78,11 +78,10 @@ export default function DealModal({ deal, leads, onClose, onSave }) {
   }
 
   const stageOptions = [
-    { value: 'Prospecting', label: 'Prospecting' },
-    { value: 'Qualification', label: 'Qualification' },
-    { value: 'Proposal', label: 'Proposal' },
+    { value: 'Prospect', label: 'Prospect' },
     { value: 'Negotiation', label: 'Negotiation' },
-    { value: 'Closed', label: 'Closed' },
+    { value: 'Won', label: 'Won' },
+    { value: 'Lost', label: 'Lost' },
   ]
 
   return (
