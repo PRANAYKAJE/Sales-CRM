@@ -202,7 +202,7 @@ export default function Register() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3 bg-primary-500 dark:bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-600 dark:hover:bg-primary-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -217,7 +217,7 @@ export default function Register() {
 
           <p className="text-center mt-6 text-gray-600 dark:text-gray-400">
             Already have an account?{' '}
-            <Link to="/login" className="text-primary-500 font-medium hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300">
+            <Link to="/login" className="text-primary-500 dark:text-primary-400 font-medium hover:text-primary-600 dark:hover:text-primary-300">
               Sign In
             </Link>
           </p>
