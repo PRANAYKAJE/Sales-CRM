@@ -266,8 +266,16 @@ export default function LeadDetail() {
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${getActivityColor(activity.type)}`}>
                       {getActivityIcon(activity.type)}
                     </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-800 dark:text-white">{activity.type}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <p className="font-medium text-gray-800 dark:text-white">{activity.type}</p>
+                        {activity.userId && typeof activity.userId === 'object' && (
+                          <>
+                            <span className="text-gray-300 dark:text-gray-600 hidden sm:inline">•</span>
+                            <p className="text-sm text-primary-600 dark:text-primary-400 truncate">{activity.userId.name}</p>
+                          </>
+                        )}
+                      </div>
                       <p className="text-sm text-gray-600 dark:text-gray-400">{activity.description}</p>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{formatDate(activity.createdAt)}</p>
                     </div>

@@ -22,6 +22,7 @@ const getActivities = async (req, res) => {
     const activities = await Activity.find(query)
       .populate('leadId', 'name company')
       .populate('dealId', 'title value stage')
+      .populate('userId', 'name')
       .sort({ createdAt: -1 })
       .lean();
     return res.json(activities);

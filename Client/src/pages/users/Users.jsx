@@ -91,23 +91,21 @@ export default function Users() {
             return (
               <div key={person._id} className="bg-white dark:bg-gray-800 rounded-xl shadow-card border border-gray-100 dark:border-gray-700 overflow-hidden">
                 <div className="p-4 md:p-6 border-b border-gray-200 dark:border-gray-700">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-center gap-3 md:gap-4">
-                      <div className="w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center">
-                        <span className="text-white font-bold text-lg">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                      <div className="w-10 h-10 md:w-12 md:h-12 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-white font-bold text-sm md:text-lg">
                           {person.name ? person.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?'}
                         </span>
                       </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-800 dark:text-white">{person.name}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{person.email}</p>
+                      <div className="min-w-0">
+                        <h3 className="text-base md:text-lg font-semibold text-gray-800 dark:text-white truncate">{person.name}</h3>
+                        <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 truncate">{person.email}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-gray-800 dark:text-white">{userLeads.length}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Leads</p>
-                      </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">{userLeads.length}</p>
+                      <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">Leads</p>
                     </div>
                   </div>
                 </div>
