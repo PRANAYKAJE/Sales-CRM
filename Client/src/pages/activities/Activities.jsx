@@ -10,6 +10,7 @@ export default function Activities() {
   const [showModal, setShowModal] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(null)
   const [typeFilter, setTypeFilter] = useState('')
+  const [sortBy, setSortBy] = useState('newest')
 
   useEffect(() => {
     fetchData()
@@ -26,7 +27,6 @@ export default function Activities() {
       setLeads(leadsRes.data || [])
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load activities')
-      console.error('Error fetching data:', err)
     } finally {
       setLoading(false)
     }
@@ -59,6 +59,25 @@ export default function Activities() {
     if (!typeFilter) return true
     return activity.type === typeFilter
   })
+
+  const sortedActivities = [...filteredActivities].sort((a, b) => {
+    switch (sortBy) {
+      case 'newest':
+        return new Date(b.createdAt) - new Date(a.createdAt)
+      case 'oldest':
+        return new Date(a.createdAt) - new Date(b.createdAt)
+      case 'type':
+        return (a.type || '').localeCompare(b.type || '')
+      default:
+        return 0
+    }
+  })
+
+  const sortOptions = [
+    { value: 'newest', label: 'Newest First' },
+    { value: 'oldest', label: 'Oldest First' },
+    { value: 'type', label: 'Type' },
+  ]
 
   const formatDate = (date) => {
     if (!date) return '-'
@@ -155,11 +174,11 @@ export default function Activities() {
         </div>
       )}
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center flex-wrap gap-3">
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-800 dark:text-gray-200"
+          className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-800 dark:text-gray-200 text-sm"
         >
           {typeOptions.map((option) => (
             <option key={option.value} value={option.value}>
@@ -167,14 +186,25 @@ export default function Activities() {
             </option>
           ))}
         </select>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-800 dark:text-gray-200 text-sm"
+        >
+          {sortOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
         <span className="text-sm text-gray-500 dark:text-gray-400">
-          {filteredActivities.length} {filteredActivities.length === 1 ? 'activity' : 'activities'}
+          {sortedActivities.length} {sortedActivities.length === 1 ? 'activity' : 'activities'}
         </span>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-card border border-gray-100 dark:border-gray-700">
-        <div className="p-6">
-          {filteredActivities.length === 0 ? (
+        <div className="p-3 md:p-6">
+          {sortedActivities.length === 0 ? (
             <div className="text-center py-12">
               <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -196,7 +226,7 @@ export default function Activities() {
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredActivities.map((activity) => (
+              {sortedActivities.map((activity) => (
                 <div
                   key={activity._id}
                   className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"

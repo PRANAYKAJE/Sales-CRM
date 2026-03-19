@@ -6,7 +6,6 @@ const getAllUsers = async (req, res) => {
     const users = await User.find({}).select('-password').lean();
     return res.json(users);
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: 'Unable to fetch users' });
   }
 };
@@ -24,7 +23,6 @@ const getSalesPersons = async (req, res) => {
     
     return res.json(salesWithLeadCounts);
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: 'Unable to fetch sales persons' });
   }
 };
@@ -40,7 +38,6 @@ const getUserById = async (req, res) => {
     
     return res.json(user);
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: 'Unable to fetch user' });
   }
 };
@@ -71,7 +68,6 @@ const updateUser = async (req, res) => {
     
     return res.json(userResponse);
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: 'Unable to update user' });
   }
 };
@@ -92,7 +88,6 @@ const deleteUser = async (req, res) => {
     await user.deleteOne();
     return res.json({ message: 'User removed' });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: 'Unable to delete user' });
   }
 };

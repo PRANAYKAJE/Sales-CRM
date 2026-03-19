@@ -28,10 +28,16 @@ export default function DealModal({ deal, leads, onClose, onSave }) {
     
     if (!formData.title.trim()) {
       newErrors.title = 'Deal title is required'
+    } else if (formData.title.trim().length < 3) {
+      newErrors.title = 'Title must be at least 3 characters'
     }
     
     if (!formData.leadId) {
       newErrors.leadId = 'Please select a lead'
+    }
+    
+    if (formData.value && isNaN(parseFloat(formData.value))) {
+      newErrors.value = 'Please enter a valid number'
     }
     
     setErrors(newErrors)
@@ -87,104 +93,102 @@ export default function DealModal({ deal, leads, onClose, onSave }) {
   return (
     <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4 animate-fade-in" onClick={onClose}>
       <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-scale-in" onClick={(e) => e.stopPropagation()}>
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="p-4 md:p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+            <h2 className="text-lg md:text-xl font-semibold text-gray-800 dark:text-white">
               {deal ? 'Edit Deal' : 'Add New Deal'}
             </h2>
             <button
               onClick={onClose}
               className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4">
           {error && (
             <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
               <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
             </div>
           )}
 
-          <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Deal Title *
+            </label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-800 dark:text-gray-200 ${errors.title ? 'border-red-500 dark:border-red-500' : 'border-gray-200 dark:border-gray-600'}`}
+              placeholder="Enter deal title"
+            />
+            {errors.title && <p className="mt-1 text-sm text-red-500">{errors.title}</p>}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Deal Title *
+                Value ($)
               </label>
               <input
-                type="text"
-                name="title"
-                value={formData.title}
+                type="number"
+                name="value"
+                value={formData.value}
                 onChange={handleChange}
-                required
-                className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-800 dark:text-gray-200 ${errors.title ? 'border-red-500 dark:border-red-500' : 'border-gray-200 dark:border-gray-600'}`}
-                placeholder="Enter deal title"
+                min="0"
+                step="0.01"
+                className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-800 dark:text-gray-200 ${errors.value ? 'border-red-500 dark:border-red-500' : 'border-gray-200 dark:border-gray-600'}`}
+                placeholder="0.00"
               />
-              {errors.title && <p className="mt-1 text-sm text-red-500">{errors.title}</p>}
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Value ($)
-                </label>
-                <input
-                  type="number"
-                  name="value"
-                  value={formData.value}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-800 dark:text-gray-200"
-                  placeholder="0"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Stage
-                </label>
-                <select
-                  name="stage"
-                  value={formData.stage}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-800 dark:text-gray-200"
-                >
-                  {stageOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {errors.value && <p className="mt-1 text-sm text-red-500">{errors.value}</p>}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Related Lead *
+                Stage
               </label>
               <select
-                name="leadId"
-                value={formData.leadId}
+                name="stage"
+                value={formData.stage}
                 onChange={handleChange}
-                required
-                className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-800 dark:text-gray-200 ${errors.leadId ? 'border-red-500 dark:border-red-500' : 'border-gray-200 dark:border-gray-600'}`}
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-800 dark:text-gray-200"
               >
-                <option value="">Select a lead</option>
-                {leads.map((lead) => (
-                  <option key={lead._id} value={lead._id}>
-                    {lead.name} {lead.company ? `- ${lead.company}` : ''}
+                {stageOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
                   </option>
                 ))}
               </select>
-              {errors.leadId && <p className="mt-1 text-sm text-red-500">{errors.leadId}</p>}
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Related Lead *
+            </label>
+            <select
+              name="leadId"
+              value={formData.leadId}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-800 dark:text-gray-200 ${errors.leadId ? 'border-red-500 dark:border-red-500' : 'border-gray-200 dark:border-gray-600'}`}
+            >
+              <option value="">Select a lead</option>
+              {leads.map((lead) => (
+                <option key={lead._id} value={lead._id}>
+                  {lead.name} {lead.company ? `- ${lead.company}` : ''}
+                </option>
+              ))}
+            </select>
+            {errors.leadId && <p className="mt-1 text-sm text-red-500">{errors.leadId}</p>}
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}

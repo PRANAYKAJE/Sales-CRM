@@ -17,6 +17,7 @@ export default function Deals() {
   const [showModal, setShowModal] = useState(false)
   const [editingDeal, setEditingDeal] = useState(null)
   const [deleteLoading, setDeleteLoading] = useState(null)
+  const [sortBy, setSortBy] = useState('newest')
 
   useEffect(() => {
     fetchData()
@@ -33,7 +34,6 @@ export default function Deals() {
       setLeads(leadsRes.data || [])
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load deals')
-      console.error('Error fetching data:', err)
     } finally {
       setLoading(false)
     }
@@ -73,8 +73,32 @@ export default function Deals() {
   }
 
   const getDealsByStage = (stageId) => {
-    return deals.filter((deal) => deal.stage === stageId)
+    const stageDeals = deals.filter((deal) => deal.stage === stageId)
+    return [...stageDeals].sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return new Date(b.createdAt) - new Date(a.createdAt)
+        case 'oldest':
+          return new Date(a.createdAt) - new Date(b.createdAt)
+        case 'valueHigh':
+          return (b.value || 0) - (a.value || 0)
+        case 'valueLow':
+          return (a.value || 0) - (b.value || 0)
+        case 'title':
+          return (a.title || '').localeCompare(b.title || '')
+        default:
+          return 0
+      }
+    })
   }
+
+  const sortOptions = [
+    { value: 'newest', label: 'Newest First' },
+    { value: 'oldest', label: 'Oldest First' },
+    { value: 'valueHigh', label: 'Value (High-Low)' },
+    { value: 'valueLow', label: 'Value (Low-High)' },
+    { value: 'title', label: 'Title (A-Z)' },
+  ]
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-US', {
@@ -154,12 +178,26 @@ export default function Deals() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="flex justify-end mb-4">
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-800 dark:text-gray-200 text-sm"
+        >
+          {sortOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         {stages.map((stage) => {
           const colors = getStageColor(stage.color)
           const stageDeals = getDealsByStage(stage.id)
           return (
-            <div key={stage.id} className="flex flex-col">
+            <div key={stage.id} className="flex flex-col min-w-0">
               <div className={`border-t-4 ${colors.border} bg-white dark:bg-gray-800 rounded-xl shadow-card border border-gray-100 dark:border-gray-700 transition-colors`}>
                 <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center justify-between">

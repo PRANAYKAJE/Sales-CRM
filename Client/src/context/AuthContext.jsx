@@ -17,7 +17,6 @@ export function AuthProvider({ children }) {
           setUser(userData)
         }
       } catch (e) {
-        console.error('Failed to parse user data:', e)
         localStorage.removeItem('user')
       }
     }

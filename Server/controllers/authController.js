@@ -8,7 +8,6 @@ const generateToken = (id) => {
   });
 };
 
-// Register a new user
 const registerUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -47,12 +46,10 @@ const registerUser = async (req, res) => {
       token: generateToken(user._id)
     });
   } catch (error) {
-    console.error('Register error', error);
     return res.status(500).json({ message: 'Server error during registration' });
   }
 };
 
-// Login a user
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -80,7 +77,6 @@ const loginUser = async (req, res) => {
       token: generateToken(user._id)
     });
   } catch (error) {
-    console.error('Login error', error);
     return res.status(500).json({ message: 'Server error during login' });
   }
 };

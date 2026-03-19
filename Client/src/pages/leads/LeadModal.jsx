@@ -7,7 +7,6 @@ export default function LeadModal({ lead, onClose, onSave }) {
     email: '',
     phone: '',
     company: '',
-    status: 'New Lead',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -20,20 +19,35 @@ export default function LeadModal({ lead, onClose, onSave }) {
         email: lead.email || '',
         phone: lead.phone || '',
         company: lead.company || '',
-        status: lead.status || 'New Lead',
       })
     }
   }, [lead])
 
   const validateForm = () => {
     const newErrors = {}
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const phoneRegex = /^\+?[\d\s\-]{7,15}$/
     
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required'
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters'
     }
     
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required'
+    } else if (!emailRegex.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address'
+    }
+    
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required'
+    } else if (!phoneRegex.test(formData.phone.trim())) {
+      newErrors.phone = 'Phone must be 7-15 digits'
+    }
+    
+    if (!formData.company.trim()) {
+      newErrors.company = 'Company is required'
     }
     
     setErrors(newErrors)
@@ -60,11 +74,18 @@ export default function LeadModal({ lead, onClose, onSave }) {
     setError('')
 
     try {
+      const payload = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        company: formData.company.trim(),
+      }
+
       let response
       if (lead) {
-        response = await leadsAPI.update(lead._id, formData)
+        response = await leadsAPI.update(lead._id, payload)
       } else {
-        response = await leadsAPI.create(formData)
+        response = await leadsAPI.create(payload)
       }
       onSave(response.data)
     } catch (err) {
@@ -74,117 +95,95 @@ export default function LeadModal({ lead, onClose, onSave }) {
     }
   }
 
-  const statusOptions = [
-    { value: 'New Lead', label: 'New Lead' },
-    { value: 'Contacted', label: 'Contacted' },
-    { value: 'Qualified', label: 'Qualified' },
-    { value: 'Proposal', label: 'Proposal' },
-    { value: 'Won', label: 'Won' },
-    { value: 'Lost', label: 'Lost' },
-  ]
-
   return (
     <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4 animate-fade-in" onClick={onClose}>
       <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-scale-in" onClick={(e) => e.stopPropagation()}>
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="p-4 md:p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+            <h2 className="text-lg md:text-xl font-semibold text-gray-800 dark:text-white">
               {lead ? 'Edit Lead' : 'Add New Lead'}
             </h2>
             <button
               onClick={onClose}
               className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4">
           {error && (
             <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
               <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Name *
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-800 dark:text-gray-200 ${errors.name ? 'border-red-500 dark:border-red-500' : 'border-gray-200 dark:border-gray-600'}`}
-              />
-              {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Name *
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-800 dark:text-gray-200 ${errors.name ? 'border-red-500 dark:border-red-500' : 'border-gray-200 dark:border-gray-600'}`}
+              placeholder="Enter lead name"
+            />
+            {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
+          </div>
 
-            <div className="col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Email
+                Email *
               </label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-800 dark:text-gray-200 ${errors.email ? 'border-red-500 dark:border-red-500' : 'border-gray-200 dark:border-gray-600'}`}
+                className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-800 dark:text-gray-200 ${errors.email ? 'border-red-500 dark:border-red-500' : 'border-gray-200 dark:border-gray-600'}`}
+                placeholder="email@example.com"
               />
               {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Phone
+                Phone *
               </label>
               <input
                 type="tel"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-800 dark:text-gray-200"
+                className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-800 dark:text-gray-200 ${errors.phone ? 'border-red-500 dark:border-red-500' : 'border-gray-200 dark:border-gray-600'}`}
+                placeholder="+1 234567890"
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Company
-              </label>
-              <input
-                type="text"
-                name="company"
-                value={formData.company}
-                onChange={handleChange}
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-800 dark:text-gray-200"
-              />
-            </div>
-
-            <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Status
-              </label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-800 dark:text-gray-200"
-              >
-                {statusOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              {errors.phone && <p className="mt-1 text-sm text-red-500">{errors.phone}</p>}
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Company *
+            </label>
+            <input
+              type="text"
+              name="company"
+              value={formData.company}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-800 dark:text-gray-200 ${errors.company ? 'border-red-500 dark:border-red-500' : 'border-gray-200 dark:border-gray-600'}`}
+              placeholder="Company name"
+            />
+            {errors.company && <p className="mt-1 text-sm text-red-500">{errors.company}</p>}
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}

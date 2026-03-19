@@ -5,11 +5,6 @@ const LeadSchema = new mongoose.Schema({
   email: { type: String },
   phone: { type: String },
   company: { type: String },
-  status: {
-    type: String,
-    enum: ["New Lead", "Contacted", "Qualified", "Proposal", "Won", "Lost"],
-    default: "New Lead",
-  },
   assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   createdAt: { type: Date, default: Date.now },
 });

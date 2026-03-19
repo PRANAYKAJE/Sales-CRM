@@ -22,19 +22,16 @@ export default function ActivityModal({ leads, onClose, onSave }) {
       const res = await dealsAPI.getAll()
       setDeals(res.data || [])
     } catch (err) {
-      console.error('Error fetching deals:', err)
     }
   }
 
   const validateForm = () => {
     const newErrors = {}
     
-    if (!formData.leadId && !formData.dealId) {
-      newErrors.general = 'Please select a lead or deal'
-    }
-    
     if (!formData.description.trim()) {
       newErrors.description = 'Description is required'
+    } else if (formData.description.trim().length < 5) {
+      newErrors.description = 'Description must be at least 5 characters'
     }
     
     setErrors(newErrors)
@@ -47,9 +44,6 @@ export default function ActivityModal({ leads, onClose, onSave }) {
     setError('')
     if (errors[name]) {
       setErrors({ ...errors, [name]: '' })
-    }
-    if (errors.general) {
-      setErrors({ ...errors, general: '' })
     }
   }
 
@@ -89,34 +83,28 @@ export default function ActivityModal({ leads, onClose, onSave }) {
   return (
     <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4 animate-fade-in" onClick={onClose}>
       <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-scale-in" onClick={(e) => e.stopPropagation()}>
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="p-4 md:p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Log New Activity</h2>
+            <h2 className="text-lg md:text-xl font-semibold text-gray-800 dark:text-white">Log New Activity</h2>
             <button
               onClick={onClose}
               className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4">
           {error && (
             <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
               <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
             </div>
           )}
 
-          {errors.general && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <p className="text-sm text-red-600 dark:text-red-400">{errors.general}</p>
-            </div>
-          )}
-
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Related Lead
@@ -125,7 +113,7 @@ export default function ActivityModal({ leads, onClose, onSave }) {
                 name="leadId"
                 value={formData.leadId}
                 onChange={handleChange}
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-800 dark:text-gray-200"
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-800 dark:text-gray-200"
               >
                 <option value="">Select a lead (optional)</option>
                 {leads.map((lead) => (
@@ -144,7 +132,7 @@ export default function ActivityModal({ leads, onClose, onSave }) {
                 name="dealId"
                 value={formData.dealId}
                 onChange={handleChange}
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-800 dark:text-gray-200"
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-800 dark:text-gray-200"
               >
                 <option value="">Select a deal (optional)</option>
                 {deals.map((deal) => (
@@ -154,44 +142,42 @@ export default function ActivityModal({ leads, onClose, onSave }) {
                 ))}
               </select>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Type *
-              </label>
-              <select
-                name="type"
-                value={formData.type}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-800 dark:text-gray-200"
-              >
-                {typeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Description *
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                required
-                rows="4"
-                className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none text-gray-800 dark:text-gray-200 ${errors.description ? 'border-red-500 dark:border-red-500' : 'border-gray-200 dark:border-gray-600'}`}
-                placeholder="Describe the activity..."
-              />
-              {errors.description && <p className="mt-1 text-sm text-red-500">{errors.description}</p>}
-            </div>
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Type *
+            </label>
+            <select
+              name="type"
+              value={formData.type}
+              onChange={handleChange}
+              className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-800 dark:text-gray-200"
+            >
+              {typeOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Description *
+            </label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows="4"
+              className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none text-gray-800 dark:text-gray-200 ${errors.description ? 'border-red-500 dark:border-red-500' : 'border-gray-200 dark:border-gray-600'}`}
+              placeholder="Describe the activity..."
+            />
+            {errors.description && <p className="mt-1 text-sm text-red-500">{errors.description}</p>}
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}

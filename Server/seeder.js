@@ -30,24 +30,24 @@ const users = [
 ];
 
 const leadsData = [
-  { name: "Robert Chen", email: "robert.chen@techcorp.com", company: "TechCorp Inc", phone: "555-0101", status: "New Lead" },
-  { name: "Lisa Anderson", email: "lisa@globex.io", company: "Globex Solutions", phone: "555-0102", status: "Contacted" },
-  { name: "James Wilson", email: "jwilson@soylent.co", company: "Soylent Corp", phone: "555-0103", status: "Qualified" },
-  { name: "Maria Garcia", email: "maria.g@initech.com", company: "Initech LLC", phone: "555-0104", status: "Proposal" },
-  { name: "David Brown", email: "david.brown@umbrella.net", company: "Umbrella Corp", phone: "555-0105", status: "Won" },
-  { name: "Jennifer Taylor", email: "jtaylor@acme.com", company: "Acme Industries", phone: "555-0106", status: "Lost" },
-  { name: "Michael Lee", email: "m.lee@startup.io", company: "Startup Labs", phone: "555-0107", status: "New Lead" },
-  { name: "Amanda White", email: "awhite@enterprise.com", company: "Enterprise Solutions", phone: "555-0108", status: "Contacted" },
-  { name: "Chris Martinez", email: "cmartinez@fintech.co", company: "FinTech Partners", phone: "555-0109", status: "Qualified" },
-  { name: "Rachel Green", email: "rachel.green@retail.com", company: "Retail Dynamics", phone: "555-0110", status: "Proposal" },
-  { name: "Kevin Thompson", email: "kthompson@media.com", company: "Media Group Inc", phone: "555-0111", status: "Won" },
-  { name: "Nicole Brown", email: "nbrown@healthtech.io", company: "HealthTech Systems", phone: "555-0112", status: "New Lead" },
-  { name: "Daniel Kim", email: "dkim@cloudtech.com", company: "CloudTech Systems", phone: "555-0113", status: "Contacted" },
-  { name: "Sophia Martinez", email: "smartinez@dataflow.com", company: "DataFlow Analytics", phone: "555-0114", status: "Qualified" },
-  { name: "Andrew Parker", email: "aparker@nexgen.com", company: "NexGen Industries", phone: "555-0115", status: "Proposal" },
-  { name: "Emma Rodriguez", email: "erodriguez@innovate.com", company: "Innovate Tech", phone: "555-0116", status: "Won" },
-  { name: "Ryan Cooper", email: "rcooper@digital.com", company: "Digital Solutions", phone: "555-0117", status: "Lost" },
-  { name: "Olivia Harris", email: "oharris@smartbiz.com", company: "SmartBiz Inc", phone: "555-0118", status: "New Lead" },
+  { name: "Robert Chen", email: "robert.chen@techcorp.com", company: "TechCorp Inc", phone: "555-0101" },
+  { name: "Lisa Anderson", email: "lisa@globex.io", company: "Globex Solutions", phone: "555-0102" },
+  { name: "James Wilson", email: "jwilson@soylent.co", company: "Soylent Corp", phone: "555-0103" },
+  { name: "Maria Garcia", email: "maria.g@initech.com", company: "Initech LLC", phone: "555-0104" },
+  { name: "David Brown", email: "david.brown@umbrella.net", company: "Umbrella Corp", phone: "555-0105" },
+  { name: "Jennifer Taylor", email: "jtaylor@acme.com", company: "Acme Industries", phone: "555-0106" },
+  { name: "Michael Lee", email: "m.lee@startup.io", company: "Startup Labs", phone: "555-0107" },
+  { name: "Amanda White", email: "awhite@enterprise.com", company: "Enterprise Solutions", phone: "555-0108" },
+  { name: "Chris Martinez", email: "cmartinez@fintech.co", company: "FinTech Partners", phone: "555-0109" },
+  { name: "Rachel Green", email: "rachel.green@retail.com", company: "Retail Dynamics", phone: "555-0110" },
+  { name: "Kevin Thompson", email: "kthompson@media.com", company: "Media Group Inc", phone: "555-0111" },
+  { name: "Nicole Brown", email: "nbrown@healthtech.io", company: "HealthTech Systems", phone: "555-0112" },
+  { name: "Daniel Kim", email: "dkim@cloudtech.com", company: "CloudTech Systems", phone: "555-0113" },
+  { name: "Sophia Martinez", email: "smartinez@dataflow.com", company: "DataFlow Analytics", phone: "555-0114" },
+  { name: "Andrew Parker", email: "aparker@nexgen.com", company: "NexGen Industries", phone: "555-0115" },
+  { name: "Emma Rodriguez", email: "erodriguez@innovate.com", company: "Innovate Tech", phone: "555-0116" },
+  { name: "Ryan Cooper", email: "rcooper@digital.com", company: "Digital Solutions", phone: "555-0117" },
+  { name: "Olivia Harris", email: "oharris@smartbiz.com", company: "SmartBiz Inc", phone: "555-0118" },
 ];
 
 const dealsData = [
@@ -203,7 +203,7 @@ const importData = async () => {
       });
 
       createdLeads.push(lead);
-      console.log(`  ✓ ${lead.name} @ ${lead.company} (${lead.status}) - Assigned: ${assignedUser.name}`);
+      console.log(`  ✓ ${lead.name} @ ${lead.company} - Assigned: ${assignedUser.name}`);
     }
     console.log(`\nTotal leads: ${createdLeads.length}`);
 

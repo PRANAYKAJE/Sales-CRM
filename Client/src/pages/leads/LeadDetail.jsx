@@ -42,7 +42,6 @@ export default function LeadDetail() {
       }))
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load lead data')
-      console.error('Error fetching lead data:', err)
     } finally {
       setLoading(false)
     }
@@ -50,10 +49,8 @@ export default function LeadDetail() {
 
   const getStatusBadge = (status) => {
     const classes = {
-      'New Lead': 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300',
-      'Contacted': 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300',
-      'Qualified': 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300',
-      'Proposal': 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300',
+      'Prospect': 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300',
+      'Negotiation': 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300',
       'Won': 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300',
       'Lost': 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300',
     }
@@ -167,13 +164,13 @@ export default function LeadDetail() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-card p-6 border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
-                <span className="text-primary-600 dark:text-primary-400 font-bold text-2xl">
-                  {lead.name?.charAt(0)?.toUpperCase()}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-card p-4 md:p-6 border border-gray-100 dark:border-gray-700">
+            <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
+              <div className="w-16 h-16 bg-primary-500 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-2xl">
+                  {lead.name ? lead.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?'}
                 </span>
               </div>
               <div>
@@ -236,9 +233,9 @@ export default function LeadDetail() {
           </div>
         </div>
 
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-card p-6 border border-gray-100 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Related Deals</h3>
+        <div className="lg:col-span-2 space-y-4 md:space-y-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-card p-4 md:p-6 border border-gray-100 dark:border-gray-700">
+            <h3 className="text-base md:text-lg font-semibold text-gray-800 dark:text-white mb-3 md:mb-4">Related Deals</h3>
             {deals.length === 0 ? (
               <p className="text-gray-500 dark:text-gray-400 text-center py-8">No deals found for this lead</p>
             ) : (
@@ -258,8 +255,8 @@ export default function LeadDetail() {
             )}
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-card p-6 border border-gray-100 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Activity History</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-card p-4 md:p-6 border border-gray-100 dark:border-gray-700">
+            <h3 className="text-base md:text-lg font-semibold text-gray-800 dark:text-white mb-3 md:mb-4">Activity History</h3>
             {activities.length === 0 ? (
               <p className="text-gray-500 dark:text-gray-400 text-center py-8">No activities found for this lead</p>
             ) : (

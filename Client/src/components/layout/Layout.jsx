@@ -1,8 +1,10 @@
 import { Outlet, useLocation } from 'react-router-dom'
+import { useState } from 'react'
 import Sidebar from './Sidebar'
 import Navbar from './Navbar'
 
 export default function Layout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const location = useLocation()
   
   const getPageTitle = () => {
@@ -15,12 +17,22 @@ export default function Layout() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Navbar title={getPageTitle()} />
-        <main className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-          <Outlet />
+    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        <Navbar onMenuClick={() => setSidebarOpen(true)} />
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 custom-scrollbar bg-gray-50 dark:bg-gray-900">
+          <div className="max-w-[100vw] overflow-hidden">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

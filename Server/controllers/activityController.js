@@ -26,7 +26,6 @@ const getActivities = async (req, res) => {
       .lean();
     return res.json(activities);
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: 'Unable to fetch activities' });
   }
 };
@@ -60,7 +59,6 @@ const getActivityById = async (req, res) => {
 
     return res.json(activity);
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: 'Unable to fetch activity' });
   }
 };
@@ -109,7 +107,6 @@ const createActivity = async (req, res) => {
     });
     return res.status(201).json(activity);
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: 'Unable to create activity' });
   }
 };
@@ -153,7 +150,6 @@ const updateActivity = async (req, res) => {
     await activity.save();
     return res.json(activity);
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: 'Unable to update activity' });
   }
 };
@@ -185,7 +181,6 @@ const deleteActivity = async (req, res) => {
     await activity.deleteOne();
     return res.json({ message: 'Activity removed' });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: 'Unable to delete activity' });
   }
 };

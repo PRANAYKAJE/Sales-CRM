@@ -22,7 +22,6 @@ export default function Users() {
       setLeads(leadsRes.data || [])
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load users data')
-      console.error('Error fetching users data:', err)
     } finally {
       setLoading(false)
     }
@@ -39,10 +38,8 @@ export default function Users() {
 
   const getStatusBadge = (status) => {
     const badges = {
-      'New Lead': 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300',
-      'Contacted': 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300',
-      'Qualified': 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300',
-      'Proposal': 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300',
+      'Prospect': 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300',
+      'Negotiation': 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300',
       'Won': 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300',
       'Lost': 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300',
     }
@@ -80,10 +77,10 @@ export default function Users() {
         </div>
       )}
 
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         {salesPersons.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-card p-8 border border-gray-100 dark:border-gray-700 text-center">
-            <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-card p-6 md:p-8 border border-gray-100 dark:border-gray-700 text-center">
+            <svg className="w-12 h-12 md:w-16 md:h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             <p className="text-gray-500 dark:text-gray-400">No sales persons found</p>
@@ -93,12 +90,12 @@ export default function Users() {
             const userLeads = getLeadsForUser(person._id)
             return (
               <div key={person._id} className="bg-white dark:bg-gray-800 rounded-xl shadow-card border border-gray-100 dark:border-gray-700 overflow-hidden">
-                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
-                        <span className="text-primary-600 dark:text-primary-400 font-bold text-lg">
-                          {person.name?.charAt(0)?.toUpperCase() || '?'}
+                <div className="p-4 md:p-6 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 md:gap-4">
+                      <div className="w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold text-lg">
+                          {person.name ? person.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?'}
                         </span>
                       </div>
                       <div>
@@ -115,7 +112,7 @@ export default function Users() {
                   </div>
                 </div>
 
-                <div className="p-6">
+                <div className="p-4 md:p-6">
                   <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">Assigned Leads</h4>
                   {userLeads.length === 0 ? (
                     <p className="text-gray-400 dark:text-gray-500 text-sm text-center py-4">No leads assigned</p>
@@ -124,9 +121,9 @@ export default function Users() {
                       {userLeads.map((lead) => (
                         <div key={lead._id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                              <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
-                                {lead.name?.charAt(0)?.toUpperCase() || '?'}
+                            <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
+                              <span className="text-xs font-medium text-white">
+                                {lead.name ? lead.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?'}
                               </span>
                             </div>
                             <div>
@@ -135,7 +132,7 @@ export default function Users() {
                             </div>
                           </div>
                           <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge(lead.status)}`}>
-                            {lead.status || 'New Lead'}
+                            {lead.status || 'Prospect'}
                           </span>
                         </div>
                       ))}

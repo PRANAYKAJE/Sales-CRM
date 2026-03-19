@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// Create axios instance with base URL
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   headers: {
@@ -8,7 +7,6 @@ const api = axios.create({
   },
 });
 
-// Add request interceptor to include auth token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -22,12 +20,10 @@ api.interceptors.request.use(
   }
 );
 
-// Add response interceptor to handle errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Remove token and redirect to login if unauthorized
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
@@ -36,13 +32,11 @@ api.interceptors.response.use(
   }
 );
 
-// Auth API calls
 export const authAPI = {
   login: (data) => api.post('/auth/login', data),
   register: (data) => api.post('/auth/register', data),
 };
 
-// Users API calls
 export const usersAPI = {
   getAll: () => api.get('/users'),
   getSalesPersons: () => api.get('/users/sales-persons'),
@@ -51,7 +45,6 @@ export const usersAPI = {
   delete: (id) => api.delete(`/users/${id}`),
 };
 
-// Leads API calls
 export const leadsAPI = {
   getAll: () => api.get('/leads'),
   getById: (id) => api.get(`/leads/${id}`),
@@ -60,7 +53,6 @@ export const leadsAPI = {
   delete: (id) => api.delete(`/leads/${id}`),
 };
 
-// Deals API calls
 export const dealsAPI = {
   getAll: () => api.get('/deals'),
   getById: (id) => api.get(`/deals/${id}`),
@@ -69,7 +61,6 @@ export const dealsAPI = {
   delete: (id) => api.delete(`/deals/${id}`),
 };
 
-// Activities API calls
 export const activitiesAPI = {
   getAll: () => api.get('/activities'),
   getById: (id) => api.get(`/activities/${id}`),

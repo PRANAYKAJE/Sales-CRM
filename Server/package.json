@@ -8,6 +8,7 @@
     "dev": "node server.js",
     "seed": "node seeder.js",
     "seed:destroy": "node seeder.js -d",
+    "migrate": "node migrate.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

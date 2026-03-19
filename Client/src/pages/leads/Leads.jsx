@@ -9,7 +9,7 @@ export default function Leads() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
-  const [statusFilter, setStatusFilter] = useState('')
+  const [sortBy, setSortBy] = useState('newest')
   const [showModal, setShowModal] = useState(false)
   const [editingLead, setEditingLead] = useState(null)
   const [deleteLoading, setDeleteLoading] = useState(null)
@@ -32,7 +32,6 @@ export default function Leads() {
       setLeads(response.data || [])
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load leads')
-      console.error('Error fetching leads:', err)
     } finally {
       setLoading(false)
     }
@@ -83,30 +82,48 @@ export default function Leads() {
 
   const filteredLeads = leads.filter((lead) => {
     const searchLower = searchQuery.toLowerCase().trim()
-    const matchesSearch = !searchLower || 
+    if (!searchLower) return true
+    return (
       (lead.name && lead.name.toLowerCase().includes(searchLower)) ||
       (lead.email && lead.email.toLowerCase().includes(searchLower)) ||
       (lead.company && lead.company.toLowerCase().includes(searchLower))
-    const matchesStatus = !statusFilter || lead.status === statusFilter
-    return matchesSearch && matchesStatus
+    )
   })
+
+  const sortedLeads = [...filteredLeads].sort((a, b) => {
+    switch (sortBy) {
+      case 'newest':
+        return new Date(b.createdAt) - new Date(a.createdAt)
+      case 'oldest':
+        return new Date(a.createdAt) - new Date(b.createdAt)
+      case 'nameAsc':
+        return (a.name || '').localeCompare(b.name || '')
+      case 'nameDesc':
+        return (b.name || '').localeCompare(a.name || '')
+      default:
+        return 0
+    }
+  })
+
+  const sortOptions = [
+    { value: 'newest', label: 'Newest First' },
+    { value: 'oldest', label: 'Oldest First' },
+    { value: 'nameAsc', label: 'Name (A-Z)' },
+    { value: 'nameDesc', label: 'Name (Z-A)' },
+  ]
 
   const statusOptions = [
     { value: '', label: 'All Status' },
-    { value: 'New Lead', label: 'New Lead' },
-    { value: 'Contacted', label: 'Contacted' },
-    { value: 'Qualified', label: 'Qualified' },
-    { value: 'Proposal', label: 'Proposal' },
+    { value: 'Prospect', label: 'Prospect' },
+    { value: 'Negotiation', label: 'Negotiation' },
     { value: 'Won', label: 'Won' },
     { value: 'Lost', label: 'Lost' },
   ]
 
   const getStatusBadge = (status) => {
     const badges = {
-      'New Lead': 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300',
-      'Contacted': 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300',
-      'Qualified': 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300',
-      'Proposal': 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300',
+      'Prospect': 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300',
+      'Negotiation': 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300',
       'Won': 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300',
       'Lost': 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300',
     }
@@ -153,9 +170,9 @@ export default function Leads() {
         </div>
       )}
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-card p-4 border border-gray-100 dark:border-gray-700">
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="flex-1">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-card p-3 md:p-4 lg:p-6 border border-gray-100 dark:border-gray-700">
+        <div className="flex flex-col md:flex-row flex-wrap gap-3 mb-6">
+          <div className="flex-1 min-w-[200px]">
             <div className="relative">
               <input
                 type="text"
@@ -174,42 +191,43 @@ export default function Leads() {
               </svg>
             </div>
           </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-800 dark:text-gray-200"
-          >
-            {statusOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          <div className="flex flex-wrap gap-3">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-800 dark:text-gray-200 text-sm"
+            >
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[800px]">
             <thead>
               <tr className="text-left text-sm text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
-                <th className="pb-3 font-medium">Name</th>
-                <th className="pb-3 font-medium">Email</th>
-                <th className="pb-3 font-medium">Company</th>
-                <th className="pb-3 font-medium">Phone</th>
-                <th className="pb-3 font-medium">Status</th>
-                <th className="pb-3 font-medium">Actions</th>
+                <th className="pb-3 pr-4 font-medium min-w-[150px]">Name</th>
+                <th className="pb-3 pr-4 font-medium min-w-[200px]">Email</th>
+                <th className="pb-3 pr-4 font-medium min-w-[150px]">Company</th>
+                <th className="pb-3 pr-4 font-medium min-w-[130px]">Phone</th>
+                <th className="pb-3 font-medium min-w-[100px]">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredLeads.length === 0 ? (
+              {sortedLeads.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="py-12 text-center">
+                  <td colSpan="5" className="py-12 text-center">
                     <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                     <p className="text-gray-500 dark:text-gray-400">
-                      {searchQuery || statusFilter ? 'No leads match your filters' : 'No leads found'}
+                      {searchQuery ? 'No leads match your search' : 'No leads found'}
                     </p>
-                    {!searchQuery && !statusFilter && (
+                    {!searchQuery && (
                       <button
                         onClick={handleAddLead}
                         className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
@@ -220,23 +238,18 @@ export default function Leads() {
                   </td>
                 </tr>
               ) : (
-                filteredLeads.map((lead) => (
+                sortedLeads.map((lead) => (
                   <tr key={lead._id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="py-4">
-                      <Link to={`/leads/${lead._id}`} className="font-medium text-gray-800 dark:text-white hover:text-primary-500 dark:hover:text-primary-400 transition-colors">
+                    <td className="py-3 pr-4">
+                      <Link to={`/leads/${lead._id}`} className="font-medium text-gray-800 dark:text-white hover:text-primary-500 dark:hover:text-primary-400 transition-colors whitespace-nowrap">
                         {lead.name || '-'}
                       </Link>
                     </td>
-                    <td className="py-4 text-gray-600 dark:text-gray-400">{lead.email || '-'}</td>
-                    <td className="py-4 text-gray-600 dark:text-gray-400">{lead.company || '-'}</td>
-                    <td className="py-4 text-gray-600 dark:text-gray-400">{lead.phone || '-'}</td>
-                    <td className="py-4">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge(lead.status)}`}>
-                        {lead.status || 'New Lead'}
-                      </span>
-                    </td>
-                    <td className="py-4">
-                      <div className="flex items-center gap-2">
+                    <td className="py-3 pr-4 text-gray-600 dark:text-gray-400 whitespace-nowrap truncate max-w-[200px]">{lead.email || '-'}</td>
+                    <td className="py-3 pr-4 text-gray-600 dark:text-gray-400 whitespace-nowrap">{lead.company || '-'}</td>
+                    <td className="py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{lead.phone || '-'}</td>
+                    <td className="py-3">
+                      <div className="flex items-center gap-2 whitespace-nowrap">
                         <button
                           onClick={() => handleEditLead(lead)}
                           className="p-2 text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 transition-colors hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg"
@@ -270,7 +283,7 @@ export default function Leads() {
         </div>
 
         <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-          Showing {filteredLeads.length} of {leads.length} leads
+          Showing {sortedLeads.length} of {leads.length} leads
         </div>
       </div>
 

@@ -1,7 +1,6 @@
 const Deal = require('../models/Deal');
 const Lead = require('../models/Lead');
 
-// Get all deals
 const getDeals = async (req, res) => {
   try {
     let query = {};
@@ -19,12 +18,10 @@ const getDeals = async (req, res) => {
     const deals = await Deal.find(query).populate('leadId', 'name company').lean();
     return res.json(deals);
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: 'Unable to fetch deals' });
   }
 };
 
-// Get a deal by ID
 const getDealById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -41,12 +38,10 @@ const getDealById = async (req, res) => {
 
     return res.json(deal);
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: 'Unable to fetch deal' });
   }
 };
 
-// Create new deal
 const createDeal = async (req, res) => {
   try {
     const { leadId, title, value, stage } = req.body;
@@ -73,7 +68,6 @@ const createDeal = async (req, res) => {
     const deal = await Deal.create({ leadId, title, value: value || 0, stage: dealStage });
     return res.status(201).json(deal);
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: 'Unable to create deal' });
   }
 };
@@ -107,7 +101,6 @@ const updateDeal = async (req, res) => {
     await deal.save();
     return res.json(deal);
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: 'Unable to update deal' });
   }
 };
@@ -129,7 +122,6 @@ const deleteDeal = async (req, res) => {
     await deal.deleteOne();
     return res.json({ message: 'Deal removed' });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: 'Unable to delete deal' });
   }
 };
