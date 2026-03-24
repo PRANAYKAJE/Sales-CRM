@@ -1,39 +1,73 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { usersAPI, leadsAPI } from '../../utils/api'
 
 export default function Users() {
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+
   const [salesPersons, setSalesPersons] = useState([])
-  const [leads, setLeads] = useState([])
+  const [leadsMap, setLeadsMap] = useState({})
+  const [expandedUsers, setExpandedUsers] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+  })
 
-  useEffect(() => {
-    fetchData()
-  }, [])
+  const page = parseInt(searchParams.get('page')) || 1
+  const limit = 10
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setError(null)
+      setLoading(true)
       const [usersRes, leadsRes] = await Promise.all([
-        usersAPI.getSalesPersons(),
-        leadsAPI.getAll(),
+        usersAPI.getSalesPersons({ page, limit }),
+        leadsAPI.getAll({ limit: 1000 }),
       ])
-      setSalesPersons(usersRes.data || [])
-      setLeads(leadsRes.data || [])
+      const result = usersRes.data
+      const usersData = Array.isArray(result?.data) ? result.data : []
+      setSalesPersons(usersData)
+      if (result?.pagination) {
+        setPagination((prev) => ({ ...prev, ...result.pagination }))
+      }
+      const leads = Array.isArray(leadsRes.data?.data) ? leadsRes.data.data : []
+      const leadsByUser = {}
+      leads.forEach((lead) => {
+        const userId = typeof lead.assignedTo === 'object' ? lead.assignedTo?._id : lead.assignedTo
+        if (userId) {
+          if (!leadsByUser[userId]) {
+            leadsByUser[userId] = []
+          }
+          leadsByUser[userId].push(lead)
+        }
+      })
+      setLeadsMap(leadsByUser)
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load users data')
+      setError(err.displayMessage || 'Failed to load users data')
     } finally {
       setLoading(false)
     }
+  }, [page, limit])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  const handlePageChange = (newPage) => {
+    navigate(`/users?page=${newPage}`)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const getLeadsForUser = (userId) => {
-    return leads.filter(lead => {
-      if (typeof lead.assignedTo === 'object') {
-        return lead.assignedTo._id === userId
-      }
-      return lead.assignedTo === userId
-    })
+  const toggleUserExpand = (userId) => {
+    setExpandedUsers((prev) => ({
+      ...prev,
+      [userId]: !prev[userId],
+    }))
   }
 
   const getStatusBadge = (status) => {
@@ -59,7 +93,7 @@ export default function Users() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Sales Team</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Manage sales persons and their leads</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Total {pagination.total} sales persons</p>
         </div>
       </div>
 
@@ -77,7 +111,7 @@ export default function Users() {
         </div>
       )}
 
-      <div className="space-y-4 md:space-y-6">
+      <div className="space-y-4">
         {salesPersons.length === 0 ? (
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-card p-6 md:p-8 border border-gray-100 dark:border-gray-700 text-center">
             <svg className="w-12 h-12 md:w-16 md:h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,10 +121,12 @@ export default function Users() {
           </div>
         ) : (
           salesPersons.map((person) => {
-            const userLeads = getLeadsForUser(person._id)
+            const userLeads = leadsMap[person._id] || []
+            const isExpanded = expandedUsers[person._id]
+
             return (
               <div key={person._id} className="bg-white dark:bg-gray-800 rounded-xl shadow-card border border-gray-100 dark:border-gray-700 overflow-hidden">
-                <div className="p-4 md:p-6 border-b border-gray-200 dark:border-gray-700">
+                <div className="p-4 md:p-6">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3 md:gap-4 min-w-0">
                       <div className="w-10 h-10 md:w-12 md:h-12 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0">
@@ -103,30 +139,48 @@ export default function Users() {
                         <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 truncate">{person.email}</p>
                       </div>
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">{userLeads.length}</p>
-                      <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">Leads</p>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <div className="text-right">
+                        <p className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">{userLeads.length}</p>
+                        <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">Leads</p>
+                      </div>
+                      {userLeads.length > 0 && (
+                        <button
+                          onClick={() => toggleUserExpand(person._id)}
+                          className="p-2 text-gray-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                        >
+                          <svg
+                            className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
 
-                <div className="p-4 md:p-6">
-                  <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">Assigned Leads</h4>
-                  {userLeads.length === 0 ? (
-                    <p className="text-gray-400 dark:text-gray-500 text-sm text-center py-4">No leads assigned</p>
-                  ) : (
+                {isExpanded && userLeads.length > 0 && (
+                  <div className="border-t border-gray-100 dark:border-gray-700 p-4 md:p-6 bg-gray-50 dark:bg-gray-900/30">
+                    <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">Assigned Leads</h4>
                     <div className="space-y-2">
                       {userLeads.map((lead) => (
-                        <div key={lead._id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
-                              <span className="text-xs font-medium text-white">
+                        <div
+                          key={lead._id}
+                          className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-8 h-8 bg-primary-400 dark:bg-primary-600 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white text-xs font-medium">
                                 {lead.name ? lead.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?'}
                               </span>
                             </div>
-                            <div>
-                              <p className="font-medium text-gray-800 dark:text-white">{lead.name}</p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">{lead.email || 'No email'}</p>
+                            <div className="min-w-0">
+                              <p className="font-medium text-gray-800 dark:text-white truncate">{lead.name || 'Unnamed'}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{lead.email || 'No email'}</p>
                             </div>
                           </div>
                           <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge(lead.status)}`}>
@@ -135,13 +189,48 @@ export default function Users() {
                         </div>
                       ))}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             )
           })
         )}
       </div>
+
+      {pagination.totalPages > 1 && (
+        <div className="flex items-center justify-center">
+          <div className="flex items-center gap-2 flex-wrap justify-center">
+            <button
+              onClick={() => handlePageChange(page - 1)}
+              disabled={page === 1}
+              className="px-3 py-2 md:px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+            >
+              <span className="hidden sm:inline">Previous</span>
+              <span className="sm:hidden">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </span>
+            </button>
+            <span className="px-3 py-2 md:px-4 text-sm text-gray-600 dark:text-gray-400">
+              <span className="md:hidden">{page}/{pagination.totalPages}</span>
+              <span className="hidden md:inline">Page {page} of {pagination.totalPages}</span>
+            </span>
+            <button
+              onClick={() => handlePageChange(page + 1)}
+              disabled={page === pagination.totalPages}
+              className="px-3 py-2 md:px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+            >
+              <span className="hidden sm:inline">Next</span>
+              <span className="sm:hidden">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

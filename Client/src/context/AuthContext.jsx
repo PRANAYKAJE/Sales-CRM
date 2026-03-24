@@ -1,27 +1,28 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState } from 'react'
 
 const AuthContext = createContext(null)
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
+const getStoredUser = () => {
+  try {
     const token = localStorage.getItem('token')
     const userDataStr = localStorage.getItem('user')
     
     if (token && userDataStr && userDataStr !== 'undefined') {
-      try {
-        const userData = JSON.parse(userDataStr)
-        if (userData && typeof userData === 'object') {
-          setUser(userData)
-        }
-      } catch (e) {
-        localStorage.removeItem('user')
+      const userData = JSON.parse(userDataStr)
+      if (userData && typeof userData === 'object') {
+        return { user: userData, loading: false }
       }
     }
-    setLoading(false)
-  }, [])
+  } catch {
+    localStorage.removeItem('user')
+  }
+  return { user: null, loading: false }
+}
+
+export function AuthProvider({ children }) {
+  const { user: initialUser, loading: initialLoading } = getStoredUser()
+  const [user, setUser] = useState(initialUser)
+  const [loading] = useState(initialLoading)
 
   const login = (token, userData) => {
     localStorage.setItem('token', token)

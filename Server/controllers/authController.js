@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { successResponse, errorResponse } = require('../utils/responseHelper');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -13,17 +14,17 @@ const registerUser = async (req, res) => {
     const { name, email, password, role } = req.body;
 
     if (!name || !email || !password) {
-      return res.status(400).json({ message: 'Please add all fields' });
+      return res.status(400).json({ success: false, message: 'Please add all fields', data: null });
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: 'Please add a valid email' });
+      return res.status(400).json({ success: false, message: 'Please add a valid email', data: null });
     }
 
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ success: false, message: 'User already exists', data: null });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -38,15 +39,22 @@ const registerUser = async (req, res) => {
       role: userRole
     });
 
-    return res.status(201).json({
+    const token = generateToken(user._id);
+    const userData = {
       _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
-      token: generateToken(user._id)
+    };
+
+    return res.status(201).json({
+      success: true,
+      message: 'User registered successfully',
+      token,
+      data: userData,
     });
   } catch (error) {
-    return res.status(500).json({ message: 'Server error during registration' });
+    return errorResponse(res, 'Server error during registration');
   }
 };
 
@@ -55,29 +63,36 @@ const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
+      return res.status(400).json({ success: false, message: 'Email and password are required', data: null });
     }
 
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(400).json({ success: false, message: 'Invalid credentials', data: null });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(400).json({ success: false, message: 'Invalid credentials', data: null });
     }
 
-    return res.json({
+    const token = generateToken(user._id);
+    const userData = {
       _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
-      token: generateToken(user._id)
+    };
+
+    return res.json({
+      success: true,
+      message: 'Login successful',
+      token,
+      data: userData,
     });
   } catch (error) {
-    return res.status(500).json({ message: 'Server error during login' });
+    return errorResponse(res, 'Server error during login');
   }
 };
 

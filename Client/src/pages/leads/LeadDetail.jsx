@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { leadsAPI, dealsAPI, activitiesAPI } from '../../utils/api'
 
@@ -10,11 +10,7 @@ export default function LeadDetail() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
-    fetchLeadData()
-  }, [id])
-
-  const fetchLeadData = async () => {
+  const fetchLeadData = useCallback(async () => {
     try {
       setError(null)
       const [leadRes, dealsRes, activitiesRes] = await Promise.all([
@@ -45,7 +41,11 @@ export default function LeadDetail() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id])
+
+  useEffect(() => {
+    fetchLeadData()
+  }, [fetchLeadData])
 
   const getStatusBadge = (status) => {
     const classes = {

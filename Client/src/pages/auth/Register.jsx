@@ -72,8 +72,8 @@ export default function Register() {
     try {
       const { confirmPassword: _, ...registerData } = formData
       const response = await authAPI.register(registerData)
-      const { token, ...userData } = response.data
-      login(token, userData)
+      const { data, token } = response.data
+      login(token, data)
       navigate('/dashboard')
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.')

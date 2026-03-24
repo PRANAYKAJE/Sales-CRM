@@ -1,29 +1,59 @@
 const User = require('../models/User');
 const Lead = require('../models/Lead');
+const { successResponse, errorResponse } = require('../utils/responseHelper');
 
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({}).select('-password').lean();
-    return res.json(users);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const total = await User.countDocuments({});
+    const users = await User.find({})
+      .select('-password')
+      .lean()
+      .skip(skip)
+      .limit(limit);
+
+    return successResponse(res, users, 'Users fetched successfully', {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (error) {
-    return res.status(500).json({ message: 'Unable to fetch users' });
+    return errorResponse(res, 'Unable to fetch users');
   }
 };
 
 const getSalesPersons = async (req, res) => {
   try {
-    const salesPersons = await User.find({ role: 'sales' }).select('-password').lean();
-    
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const total = await User.countDocuments({ role: 'sales' });
+    const salesPersons = await User.find({ role: 'sales' })
+      .select('-password')
+      .lean()
+      .skip(skip)
+      .limit(limit);
+
     const salesWithLeadCounts = await Promise.all(
       salesPersons.map(async (user) => {
         const leadCount = await Lead.countDocuments({ assignedTo: user._id });
         return { ...user, leadCount };
       })
     );
-    
-    return res.json(salesWithLeadCounts);
+
+    return successResponse(res, salesWithLeadCounts, 'Sales persons fetched successfully', {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (error) {
-    return res.status(500).json({ message: 'Unable to fetch sales persons' });
+    return errorResponse(res, 'Unable to fetch sales persons');
   }
 };
 
@@ -31,14 +61,14 @@ const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await User.findById(id).select('-password').lean();
-    
+
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ success: false, message: 'User not found', data: null });
     }
-    
-    return res.json(user);
+
+    return successResponse(res, user, 'User fetched successfully');
   } catch (error) {
-    return res.status(500).json({ message: 'Unable to fetch user' });
+    return errorResponse(res, 'Unable to fetch user');
   }
 };
 
@@ -49,7 +79,7 @@ const updateUser = async (req, res) => {
 
     const user = await User.findById(id);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ success: false, message: 'User not found', data: null });
     }
 
     if (name) user.name = name;
@@ -57,7 +87,7 @@ const updateUser = async (req, res) => {
     if (role && (role === 'admin' || role === 'sales')) user.role = role;
 
     await user.save();
-    
+
     const userResponse = {
       _id: user._id,
       name: user.name,
@@ -65,10 +95,10 @@ const updateUser = async (req, res) => {
       role: user.role,
       createdAt: user.createdAt,
     };
-    
-    return res.json(userResponse);
+
+    return successResponse(res, userResponse, 'User updated successfully');
   } catch (error) {
-    return res.status(500).json({ message: 'Unable to update user' });
+    return errorResponse(res, 'Unable to update user');
   }
 };
 
@@ -77,18 +107,18 @@ const deleteUser = async (req, res) => {
     const { id } = req.params;
 
     if (id === req.user._id.toString()) {
-      return res.status(400).json({ message: 'Cannot delete your own account' });
+      return res.status(400).json({ success: false, message: 'Cannot delete your own account', data: null });
     }
 
     const user = await User.findById(id);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ success: false, message: 'User not found', data: null });
     }
 
     await user.deleteOne();
-    return res.json({ message: 'User removed' });
+    return successResponse(res, null, 'User removed successfully');
   } catch (error) {
-    return res.status(500).json({ message: 'Unable to delete user' });
+    return errorResponse(res, 'Unable to delete user');
   }
 };
 

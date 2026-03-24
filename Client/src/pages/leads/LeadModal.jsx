@@ -26,7 +26,7 @@ export default function LeadModal({ lead, onClose, onSave }) {
   const validateForm = () => {
     const newErrors = {}
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    const phoneRegex = /^\+?[\d\s\-]{7,15}$/
+    const phoneRegex = /^\+?[\d\s-]{7,15}$/
     
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required'

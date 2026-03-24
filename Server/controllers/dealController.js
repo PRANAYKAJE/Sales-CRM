@@ -3,6 +3,10 @@ const Lead = require('../models/Lead');
 
 const getDeals = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
     let query = {};
 
     if (req.query.stage) {
@@ -15,10 +19,40 @@ const getDeals = async (req, res) => {
       query.leadId = { $in: leadIds };
     }
 
-    const deals = await Deal.find(query).populate('leadId', 'name company').lean();
-    return res.json(deals);
+    const search = req.query.search || '';
+    if (search.length >= 2) {
+      const leadIds = await Lead.find({
+        $or: [
+          { name: { $regex: search, $options: 'i' } },
+          { company: { $regex: search, $options: 'i' } },
+        ],
+      }).select('_id');
+      query.leadId = query.leadId
+        ? { $and: [query.leadId, { leadId: { $in: leadIds.map(l => l._id) } }] }
+        : { $in: leadIds.map(l => l._id) };
+    }
+
+    const total = await Deal.countDocuments(query);
+    const deals = await Deal.find(query)
+      .populate('leadId', 'name company')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    return res.json({
+      success: true,
+      message: 'Deals fetched successfully',
+      data: deals,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
-    return res.status(500).json({ message: 'Unable to fetch deals' });
+    return res.status(500).json({ success: false, message: 'Unable to fetch deals' });
   }
 };
 

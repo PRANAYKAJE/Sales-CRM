@@ -21,7 +21,8 @@ export default function ActivityModal({ leads, onClose, onSave }) {
     try {
       const res = await dealsAPI.getAll()
       setDeals(res.data || [])
-    } catch (err) {
+    } catch {
+      // Silently fail - deals dropdown will just be empty
     }
   }
 

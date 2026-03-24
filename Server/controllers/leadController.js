@@ -4,10 +4,42 @@ const Activity = require('../models/Activity');
 
 const getLeads = async (req, res) => {
   try {
-    const leads = await Lead.find({}).populate('assignedTo', 'name email').lean();
-    return res.json(leads);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const search = req.query.search || '';
+    const searchQuery = search.length >= 2
+      ? {
+          $or: [
+            { name: { $regex: search, $options: 'i' } },
+            { email: { $regex: search, $options: 'i' } },
+            { company: { $regex: search, $options: 'i' } },
+          ],
+        }
+      : {};
+
+    const total = await Lead.countDocuments(searchQuery);
+    const leads = await Lead.find(searchQuery)
+      .populate('assignedTo', 'name email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    return res.json({
+      success: true,
+      message: 'Leads fetched successfully',
+      data: leads,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
-    return res.status(500).json({ message: 'Unable to fetch leads' });
+    return res.status(500).json({ success: false, message: 'Unable to fetch leads' });
   }
 };
 

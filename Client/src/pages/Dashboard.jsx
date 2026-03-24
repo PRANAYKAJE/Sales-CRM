@@ -22,17 +22,17 @@ export default function Dashboard() {
     try {
       setError(null)
       const [leadsRes, dealsRes, activitiesRes] = await Promise.all([
-        api.get('/leads'),
-        api.get('/deals'),
-        api.get('/activities'),
+        api.get('/leads', { params: { limit: 5 } }),
+        api.get('/deals', { params: { limit: 100 } }),
+        api.get('/activities', { params: { limit: 10 } }),
       ])
 
-      const leads = leadsRes.data || []
-      const deals = dealsRes.data || []
-      const activities = activitiesRes.data || []
+      const leads = Array.isArray(leadsRes.data?.data) ? leadsRes.data.data : []
+      const deals = Array.isArray(dealsRes.data?.data) ? dealsRes.data.data : []
+      const activities = Array.isArray(activitiesRes.data?.data) ? activitiesRes.data.data : []
 
       setStats({
-        totalLeads: leads.length,
+        totalLeads: leadsRes.data?.pagination?.total || leads.length,
         dealsWon: deals.filter((d) => d.stage === 'Won').length,
         dealsLost: deals.filter((d) => d.stage === 'Lost').length,
         activities: activities.length,
@@ -41,7 +41,7 @@ export default function Dashboard() {
 
       setRecentLeads(leads.slice(0, 5))
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load dashboard data')
+      setError(err.displayMessage || 'Failed to load dashboard data')
     } finally {
       setLoading(false)
     }
@@ -133,34 +133,59 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Dashboard</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Welcome back! Here's your sales overview.</p>
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-card border border-gray-100 dark:border-gray-700 p-4 md:p-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Dashboard</h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">Welcome back! Here's your sales overview.</p>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Link
+              to="/leads"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-cyan-500 hover:bg-cyan-600 text-white text-xs font-medium rounded-lg shadow-sm hover:shadow transition-colors whitespace-nowrap"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add Lead</span>
+            </Link>
+            
+            <Link
+              to="/deals"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium rounded-lg shadow-sm hover:shadow transition-colors whitespace-nowrap"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add Deal</span>
+            </Link>
+            
+            <Link
+              to="/activities"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-violet-500 hover:bg-violet-600 text-white text-xs font-medium rounded-lg shadow-sm hover:shadow transition-colors whitespace-nowrap"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Log Activity</span>
+            </Link>
+          </div>
         </div>
-        <Link
-          to="/leads"
-          className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-all duration-200 flex items-center gap-2 hover:scale-105"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Add Lead
-        </Link>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
         {kpiCards.map((card, index) => (
           <div
             key={index}
-            className="kpi-card bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-card hover:shadow-card-hover border border-gray-100 dark:border-gray-700"
+            className="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-card hover:shadow-card-hover border border-gray-100 dark:border-gray-700 transition-all duration-200 hover:-translate-y-1"
           >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400">{card.label}</p>
                 <p className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mt-1 md:mt-2">{card.value}</p>
               </div>
-              <div className={`kpi-icon w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center ${colorClasses[card.color]}`}>
+              <div className={`w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center ${colorClasses[card.color]}`}>
                 {card.icon}
               </div>
             </div>
@@ -168,109 +193,57 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-card p-4 md:p-6 border border-gray-100 dark:border-gray-700">
-          <div className="flex items-center justify-between mb-4 md:mb-6">
-            <h2 className="text-base md:text-lg font-semibold text-gray-800 dark:text-white">Recent Leads</h2>
-            <Link to="/leads" className="text-xs md:text-sm text-primary-500 hover:text-primary-600 dark:text-primary-400 font-medium">
-              View All
-            </Link>
-          </div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-card border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div className="p-4 md:p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+          <h2 className="text-base md:text-lg font-semibold text-gray-800 dark:text-white">Recent Leads</h2>
+          <Link to="/leads" className="text-sm text-primary-500 hover:text-primary-600 dark:text-primary-400 font-medium">
+            View All →
+          </Link>
+        </div>
 
-          {recentLeads.length === 0 ? (
-            <div className="text-center py-12">
-              <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        {recentLeads.length === 0 ? (
+          <div className="p-6 md:p-8 text-center">
+            <div className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+              <svg className="w-8 h-8 md:w-10 md:h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <p className="text-gray-500 dark:text-gray-400">No leads yet</p>
-              <Link to="/leads" className="text-primary-500 hover:text-primary-600 text-sm mt-2 inline-block">
-                Create your first lead
-              </Link>
             </div>
-          ) : (
-            <div className="space-y-3">
-              {recentLeads.map((lead) => {
-                const initials = lead.name
-                  ? lead.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-                  : '?'
-                return (
-                  <Link
-                    key={lead._id}
-                    to={`/leads/${lead._id}`}
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 bg-card-hover"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center">
-                        <span className="text-white font-semibold text-sm">
-                          {initials}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-800 dark:text-white">{lead.name || '-'}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{lead.email || '-'}</p>
-                      </div>
+            <p className="text-gray-500 dark:text-gray-400">No leads yet</p>
+            <Link to="/leads" className="text-primary-500 hover:text-primary-600 text-sm mt-2 inline-block">
+              Create your first lead
+            </Link>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-100 dark:divide-gray-700">
+            {recentLeads.map((lead) => {
+              const initials = lead.name
+                ? lead.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+                : '?'
+              return (
+                <Link
+                  key={lead._id}
+                  to={`/leads/${lead._id}`}
+                  className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center">
+                      <span className="text-white font-semibold text-sm">
+                        {initials}
+                      </span>
                     </div>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge(lead.status)}`}>
-                      {lead.status || 'Prospect'}
-                    </span>
-                  </Link>
-                )
-              })}
-            </div>
-          )}
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-card p-4 md:p-6 border border-gray-100 dark:border-gray-700">
-          <div className="flex items-center justify-between mb-4 md:mb-6">
-            <h2 className="text-base md:text-lg font-semibold text-gray-800 dark:text-white">Quick Actions</h2>
+                    <div>
+                      <p className="font-medium text-gray-800 dark:text-white">{lead.name || '-'}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{lead.email || '-'}</p>
+                    </div>
+                  </div>
+                  <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${getStatusBadge(lead.status)}`}>
+                    {lead.status || 'Prospect'}
+                  </span>
+                </Link>
+              )
+            })}
           </div>
-
-          <div className="grid grid-cols-2 gap-3 md:gap-4">
-            <Link
-              to="/leads"
-              className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 group"
-            >
-              <svg className="w-8 h-8 text-blue-500 dark:text-blue-400 mb-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-              </svg>
-              <p className="font-medium text-gray-800 dark:text-white">Add Lead</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Create new lead</p>
-            </Link>
-
-            <Link
-              to="/deals"
-              className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200 group"
-            >
-              <svg className="w-8 h-8 text-green-500 dark:text-green-400 mb-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <p className="font-medium text-gray-800 dark:text-white">New Deal</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Create new deal</p>
-            </Link>
-
-            <Link
-              to="/activities"
-              className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200 group"
-            >
-              <svg className="w-8 h-8 text-purple-500 dark:text-purple-400 mb-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <p className="font-medium text-gray-800 dark:text-white">Log Activity</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Track activities</p>
-            </Link>
-
-            <Link
-              to="/leads"
-              className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 group"
-            >
-              <svg className="w-8 h-8 text-orange-500 dark:text-orange-400 mb-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <p className="font-medium text-gray-800 dark:text-white">Find Lead</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Search leads</p>
-            </Link>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   )
