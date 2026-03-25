@@ -168,8 +168,8 @@ export default function LeadDetail() {
         <div className="lg:col-span-1">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-card p-4 md:p-6 border border-gray-100 dark:border-gray-700">
             <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
-              <div className="w-16 h-16 bg-primary-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-2xl">
+              <div className="w-16 h-16 bg-primary-500 rounded-full flex items-center justify-center border-2 border-gray-200 dark:border-gray-600">
+                <span className="text-gray-800 dark:text-white font-bold text-2xl">
                   {lead.name ? lead.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?'}
                 </span>
               </div>

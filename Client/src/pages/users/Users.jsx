@@ -129,8 +129,8 @@ export default function Users() {
                 <div className="p-4 md:p-6">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3 md:gap-4 min-w-0">
-                      <div className="w-10 h-10 md:w-12 md:h-12 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-white font-bold text-sm md:text-lg">
+                      <div className="w-10 h-10 md:w-12 md:h-12 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-gray-200 dark:border-gray-600">
+                        <span className="text-gray-800 dark:text-white font-bold text-sm md:text-lg">
                           {person.name ? person.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?'}
                         </span>
                       </div>

@@ -126,8 +126,8 @@ export default function Navbar({ onMenuClick }) {
             </button>
             <div className="relative" ref={dropdownRef}>
               <button onClick={() => setShowDropdown(!showDropdown)} className="flex items-center gap-3 px-2 md:px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
-                <div className="w-9 h-9 bg-primary-500 rounded-full flex items-center justify-center select-none border-2 border-white dark:border-gray-600 shadow-sm">
-                  <span className="text-white font-semibold text-sm uppercase leading-none">
+                <div className="w-9 h-9 bg-primary-600 rounded-full flex items-center justify-center select-none border-2 border-gray-300 dark:border-gray-600 shadow-sm">
+                  <span className="text-gray-800 dark:text-white font-semibold text-sm uppercase leading-none">
                     {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U'}
                   </span>
                 </div>

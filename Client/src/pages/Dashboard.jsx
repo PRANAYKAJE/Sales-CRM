@@ -226,8 +226,8 @@ export default function Dashboard() {
                   className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center">
-                      <span className="text-white font-semibold text-sm">
+                    <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center border-2 border-gray-200 dark:border-gray-600">
+                      <span className="text-gray-800 dark:text-white font-semibold text-sm">
                         {initials}
                       </span>
                     </div>
